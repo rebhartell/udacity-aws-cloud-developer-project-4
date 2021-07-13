@@ -50,10 +50,10 @@ functions:
           cors: true
           authorizer: Auth
     iamRoleStatements:
-      - Effect: Allow
-        Action:
-          - dynamodb:Query
-        Resource: arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.TODOS_TABLE}
+      # - Effect: Allow
+      #   Action:
+      #     - dynamodb:Query
+      #   Resource: arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.TODOS_TABLE}
       - Effect: Allow
         Action:
           - dynamodb:Query
@@ -67,7 +67,6 @@ functions:
   #         path: groups
   #         cors: true
   #         # authorizer: Auth
-  #         authorizer: RS256Auth
   #         reqValidatorName: RequestBodyValidator
   #         documentation:
   #           summary: Create a new group
@@ -76,12 +75,19 @@ functions:
   #             'application/json': GroupRequest
 
   # TODO: Configure this function
-  # CreateTodo:
-  #   handler: src/lambda/http/createTodo.handler
-  #   events:
-  #     - http:
-  #         method: post
-  #         path: todos
+  CreateTodo:
+    handler: src/lambda/http/createTodo.handler
+    events:
+      - http:
+          method: post
+          path: todos
+          cors: true
+          authorizer: Auth
+    iamRoleStatements:
+      - Effect: Allow
+        Action:
+          - dynamodb:PutItem
+        Resource: arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.TODOS_TABLE}
 
   # TODO: Configure this function
   # UpdateTodo:
