@@ -8,15 +8,15 @@ import { getUserId } from '../utils'
 const logger = createLogger('lambda/http/createTodo')
 
 export const handler: APIGatewayProxyHandler = async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
-  
+
   // TODO: Implement creating a new TODO item
-  logger.info('Processing event', {event: event})
+  logger.info('handler - Processing event', { event })
 
   const newTodo: CreateTodoRequest = JSON.parse(event.body)
 
   const userId = getUserId(event)
 
-  const newItem = await createTodo(newTodo, userId)
+  const newItem = await createTodo(userId, newTodo)
 
   return {
     statusCode: 201,

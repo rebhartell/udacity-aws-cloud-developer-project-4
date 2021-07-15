@@ -1,10 +1,49 @@
-// import 'source-map-support/register'
+import { APIGatewayProxyEvent, APIGatewayProxyHandler, APIGatewayProxyResult } from 'aws-lambda'
+import 'source-map-support/register'
+import { deleteTodo } from '../../businessLogic/todos'
+import { createLogger } from '../../utils/logger'
+import { getUserId } from '../utils'
 
-// import { APIGatewayProxyEvent, APIGatewayProxyResult, APIGatewayProxyHandler } from 'aws-lambda'
 
-// export const handler: APIGatewayProxyHandler = async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
-//   const todoId = event.pathParameters.todoId
 
-//   // TODO: Remove a TODO item by id
-//   return undefined
-// }
+const logger = createLogger('lambda/http/deleteTodo')
+
+export const handler: APIGatewayProxyHandler = async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
+
+  // TODO: Remove a TODO item by id
+  logger.info('handler - Processing event', { event: event })
+
+  const todoId = event.pathParameters.todoId
+
+  const userId = getUserId(event)
+
+  try {
+    const deletedItem = await deleteTodo(userId, todoId)
+
+    logger.info('handler - deleteTodo', { deletedItem })
+
+    return {
+      statusCode: 204,
+      headers: {
+        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Credentials': true
+      },
+      body: ""
+    }
+  } catch (error) {
+    logger.error("Failed to delete todo", { todoId, error })
+
+    return {
+      statusCode: 400,
+      headers: {
+        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Credentials': true
+      },
+      body: JSON.stringify({
+        message: "Failed to delete todo",
+        todoId: todoId,
+      })
+    }
+  }
+
+}
