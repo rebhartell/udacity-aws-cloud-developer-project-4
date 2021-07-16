@@ -38,7 +38,7 @@
 					"response": []
 				},
 				{
-					"name": "Create todo",
+					"name": "Create todo - 1 of 3",
 					"event": [
 						{
 							"listen": "prerequest",
@@ -46,10 +46,23 @@
 								"exec": [
 									"",
 									"const fromTime = new Date().getTime();",
-									"const SIXTY_DAYS_IN_MSECS = 60 * 24 * 60 * 60 * 1000;",
-									"const randomDueDate = (new Date(fromTime + Math.random() * SIXTY_DAYS_IN_MSECS)).toISOString().substr(0,10);",
+									"const SEVEN_DAYS_IN_MSECS = 7 * 24 * 60 * 60 * 1000;",
+									"const randomDueDate = (new Date(fromTime + Math.random() * SEVEN_DAYS_IN_MSECS)).toISOString();",
 									"",
 									"pm.environment.set(\"randomDueDate\", randomDueDate);"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"// Tried to put the todoId into a collection variable but only global appears to work",
+									"var jsonData = JSON.parse(responseBody);",
+									"",
+									"pm.globals.set(\"todoId\", jsonData.item.todoId);",
+									""
 								],
 								"type": "text/javascript"
 							}
@@ -93,9 +106,25 @@
 					"response": []
 				},
 				{
-					"name": "Update todo",
+					"name": "Update todo - 2 of 3",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"",
+									"const fromTime = new Date().getTime();",
+									"const SEVEN_DAYS_IN_MSECS = 7 * 24 * 60 * 60 * 1000;",
+									"const randomDueDate = (new Date(fromTime + Math.random() * SEVEN_DAYS_IN_MSECS)).toISOString();",
+									"",
+									"pm.environment.set(\"randomDueDate\", randomDueDate);"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
 					"request": {
-						"method": "PUT",
+						"method": "PATCH",
 						"header": [
 							{
 								"key": "Content-Type",
@@ -111,10 +140,10 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n\t\"name\": \"Change the world\",\n\t\"dueDate\": \"2019-12-11\",\n\t\"done\": true\n}"
+							"raw": "{\n\t\"name\": \"{{$randomVerb}} {{$randomNoun}}\",\n\t\"dueDate\": \"{{randomDueDate}}\",\n\t\"done\": false\n}"
 						},
 						"url": {
-							"raw": "https://{{apiId}}.execute-api.us-east-1.amazonaws.com/dev/todos/35dd600f-43c2-4649-903c-615e1586a26f",
+							"raw": "https://{{apiId}}.execute-api.us-east-1.amazonaws.com/dev/todos/:todoId",
 							"protocol": "https",
 							"host": [
 								"{{apiId}}",
@@ -126,14 +155,20 @@
 							"path": [
 								"dev",
 								"todos",
-								"35dd600f-43c2-4649-903c-615e1586a26f"
+								":todoId"
+							],
+							"variable": [
+								{
+									"key": "todoId",
+									"value": "{{todoId}}"
+								}
 							]
 						}
 					},
 					"response": []
 				},
 				{
-					"name": "Delete todo",
+					"name": "Delete todo - 3 of 3",
 					"request": {
 						"method": "DELETE",
 						"header": [
@@ -154,7 +189,7 @@
 							"raw": ""
 						},
 						"url": {
-							"raw": "https://{{apiId}}.execute-api.us-east-1.amazonaws.com/dev/todos/fe671583-4512-45f6-9475-4265c04362fb",
+							"raw": "https://{{apiId}}.execute-api.us-east-1.amazonaws.com/dev/todos/:todoId",
 							"protocol": "https",
 							"host": [
 								"{{apiId}}",
@@ -166,7 +201,13 @@
 							"path": [
 								"dev",
 								"todos",
-								"fe671583-4512-45f6-9475-4265c04362fb"
+								":todoId"
+							],
+							"variable": [
+								{
+									"key": "todoId",
+									"value": "{{todoId}}"
+								}
 							]
 						}
 					},

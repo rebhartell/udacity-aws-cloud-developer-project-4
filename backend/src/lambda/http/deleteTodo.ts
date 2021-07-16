@@ -4,14 +4,12 @@ import { deleteTodo } from '../../businessLogic/todos'
 import { createLogger } from '../../utils/logger'
 import { getUserId } from '../utils'
 
-
-
 const logger = createLogger('lambda/http/deleteTodo')
 
 export const handler: APIGatewayProxyHandler = async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
 
   // TODO: Remove a TODO item by id
-  logger.info('handler - Processing event', { event: event })
+  logger.info('handler - Processing event', { event })
 
   const todoId = event.pathParameters.todoId
 
@@ -41,7 +39,7 @@ export const handler: APIGatewayProxyHandler = async (event: APIGatewayProxyEven
       },
       body: JSON.stringify({
         message: "Failed to delete todo",
-        todoId: todoId,
+        todoId
       })
     }
   }

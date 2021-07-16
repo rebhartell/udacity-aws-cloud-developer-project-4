@@ -2,6 +2,7 @@ import * as uuid from 'uuid'
 import { TodoAccess } from '../dataLayer/todosAccess'
 import { TodoItem } from '../models/TodoItem'
 import { CreateTodoRequest } from '../requests/CreateTodoRequest'
+import { UpdateTodoRequest } from '../requests/UpdateTodoRequest'
 import { createLogger } from '../utils/logger'
 
 const logger = createLogger('businessLogic/todos')
@@ -25,7 +26,7 @@ export async function deleteTodo(userId: string, todoId: string): Promise<TodoIt
 
   const deletedItem = todoAccess.deleteTodo(userId, todoId)
 
-  logger.info("deleteTodo - deleted todo", { deletedItem })
+  logger.info("deleteTodo - deleted item", { deletedItem })
 
   return deletedItem
 }
@@ -45,7 +46,18 @@ export async function createTodo(userId: string, createTodoRequest: CreateTodoRe
     done: false
   })
 
-  logger.info("createTodo", { createdItem })
+  logger.info("createTodo created item", { createdItem })
 
   return createdItem
+}
+
+export async function updateTodo(userId: string, todoId: string, updatedTodo: UpdateTodoRequest): Promise<TodoItem> {
+
+  logger.info("updateTodo", { userId, todoId, updatedTodo })
+
+  const updatedItem = await todoAccess.updateTodo(userId, todoId, updatedTodo)
+
+  logger.info("updateTodo - updated item", { updatedItem })
+
+  return updatedItem
 }

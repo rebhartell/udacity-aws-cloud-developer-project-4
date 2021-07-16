@@ -15,9 +15,9 @@ export const handler: APIGatewayProxyHandler = async (event: APIGatewayProxyEven
 
   logger.info('handler - Got userId', { userId })
 
-  const todos = await getAllTodos(userId)
+  const items = await getAllTodos(userId)
 
-  logger.info('handler - Got todos', { todos })
+  logger.info('handler - Got todos', { items })
 
   return {
     statusCode: 200,
@@ -26,7 +26,7 @@ export const handler: APIGatewayProxyHandler = async (event: APIGatewayProxyEven
       'Access-Control-Allow-Credentials': true
     },
     body: JSON.stringify({
-      items: todos
+      items
     })
   }
 }

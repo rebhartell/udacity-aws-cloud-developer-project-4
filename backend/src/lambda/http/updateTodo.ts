@@ -1,13 +1,49 @@
-// import 'source-map-support/register'
+import { APIGatewayProxyEvent, APIGatewayProxyHandler, APIGatewayProxyResult } from 'aws-lambda'
+import 'source-map-support/register'
+import { updateTodo } from '../../businessLogic/todos'
+import { UpdateTodoRequest } from '../../requests/UpdateTodoRequest'
+import { createLogger } from '../../utils/logger'
+import { getUserId } from '../utils'
 
-// import { APIGatewayProxyEvent, APIGatewayProxyHandler, APIGatewayProxyResult } from 'aws-lambda'
+const logger = createLogger('lambda/http/updateTodo')
 
-// import { UpdateTodoRequest } from '../../requests/UpdateTodoRequest'
+export const handler: APIGatewayProxyHandler = async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
 
-// export const handler: APIGatewayProxyHandler = async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
-//   const todoId = event.pathParameters.todoId
-//   const updatedTodo: UpdateTodoRequest = JSON.parse(event.body)
+  // TODO: Update a TODO item with the provided id using values in the "updatedTodo" object
+  logger.info('handler - Processing event', { event })
 
-//   // TODO: Update a TODO item with the provided id using values in the "updatedTodo" object
-//   return undefined
-// }
+  const todoId = event.pathParameters.todoId
+
+  const updatedTodo: UpdateTodoRequest = JSON.parse(event.body)
+
+  const userId = getUserId(event)
+
+  try {
+    const updatedItem = await updateTodo(userId, todoId, updatedTodo)
+
+    logger.info('handler - updatedItem', { updatedItem })
+
+    return {
+      statusCode: 204,
+      headers: {
+        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Credentials': true
+      },
+      body: ""
+    }
+  } catch (error) {
+    logger.error("Failed to update todo", { todoId, error })
+
+    return {
+      statusCode: 400,
+      headers: {
+        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Credentials': true
+      },
+      body: JSON.stringify({
+        message: "Failed to update todo",
+        todoId
+      })
+    }
+  }
+}

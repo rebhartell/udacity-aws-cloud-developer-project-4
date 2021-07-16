@@ -26,8 +26,9 @@ async function deleteItem(todoId) {
 
   } catch (error) {
     console.log("Item is not deleted :(", error.message);
+    console.log(JSON.stringify(error, null, 2))
   }
 
 }
 
-deleteItem("125");
+deleteItem("111");

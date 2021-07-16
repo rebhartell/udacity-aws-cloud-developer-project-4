@@ -1,6 +1,7 @@
 import * as AWS from 'aws-sdk'
 import { DocumentClient } from 'aws-sdk/clients/dynamodb'
 import { TodoItem } from '../models/TodoItem'
+import { UpdateTodoRequest } from '../requests/UpdateTodoRequest'
 import { createLogger } from '../utils/logger'
 
 const logger = createLogger('dataLayer/todosAccess')
@@ -30,7 +31,8 @@ export class TodoAccess {
 
     const items = result.Items as TodoItem[]
 
-    // remove the user id from the results
+
+    // remove the user id - keep it as a hidden field
     items.forEach(item => { delete item.userId });
 
     return items
@@ -47,7 +49,7 @@ export class TodoAccess {
 
     await this.docClient.put(params).promise()
 
-    // remove the user id from the results
+    // remove the user id - keep it as a hidden field
     delete todo.userId
 
     return todo
@@ -75,13 +77,41 @@ export class TodoAccess {
 
     const todo = result.Attributes as TodoItem
 
-    // remove the user id from the results
+    // remove the user id - keep it as a hidden field
     delete todo.userId
 
     return todo
   }
 
+
+  async updateTodo(userId: string, todoId: string, updatedTodo: UpdateTodoRequest): Promise<TodoItem> {
+
+    logger.info("updateTodo", { userId, todoId, updatedTodo })
+
+    const params = {
+      TableName: this.TodosTable,
+      Key: { userId, todoId },
+      ExpressionAttributeNames: { "#N": "name" },
+      UpdateExpression: "set #N=:todoName, dueDate=:dueDate, done=:done",
+      ExpressionAttributeValues: {
+        ":todoName": updatedTodo.name,
+        ":dueDate": updatedTodo.dueDate,
+        ":done": updatedTodo.done
+      },
+      ReturnValues: "ALL_NEW"
+    }
+
+    const result = await this.docClient.update(params).promise()
+
+    const updatedItem = result.Attributes as TodoItem
+
+    // remove the user id - keep it as a hidden field
+    delete updatedItem.userId
+
+    return updatedItem
+  }
 }
+
 
 function createDynamoDBClient() {
   if (process.env.IS_OFFLINE) {
