@@ -61,3 +61,14 @@ export async function updateTodo(userId: string, todoId: string, updatedTodo: Up
 
   return updatedItem
 }
+
+export async function generateUploadUrl(userId: string, todoId: string): Promise<string> {
+
+  logger.info("generateUploadUrl", { userId, todoId })
+
+  const uploadUrl = await todoAccess.generateUploadUrl(userId, todoId)
+
+  logger.info("generateUploadUrl - generated upload url", { uploadUrl })
+
+  return uploadUrl
+}

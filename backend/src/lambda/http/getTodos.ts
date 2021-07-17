@@ -9,24 +9,39 @@ const logger = createLogger('lambda/http/getTodos')
 export const handler: APIGatewayProxyHandler = async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
 
   // DONE: Get all TODO items for a current user
-  logger.info('handler - Processing event', { event })
+  logger.info('getTodos handler - Processing event', { event })
 
   const userId = getUserId(event);
 
-  logger.info('handler - Got userId', { userId })
+  try {
 
-  const items = await getAllTodos(userId)
+    const items = await getAllTodos(userId)
 
-  logger.info('handler - Got todos', { items })
+    logger.info('getTodos handler - Succesfully got todos', { items })
 
-  return {
-    statusCode: 200,
-    headers: {
-      'Access-Control-Allow-Origin': '*',
-      'Access-Control-Allow-Credentials': true
-    },
-    body: JSON.stringify({
-      items
-    })
+    return {
+      statusCode: 200,
+      headers: {
+        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Credentials': true
+      },
+      body: JSON.stringify({
+        items
+      })
+    }
+
+  } catch (error) {
+    logger.error("getTodos handler - Failed to get todos", { error })
+
+    return {
+      statusCode: 500,
+      headers: {
+        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Credentials': true
+      },
+      body: JSON.stringify({
+        message: "Failed to get todos"
+      })
+    }
   }
 }

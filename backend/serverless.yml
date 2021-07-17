@@ -7,7 +7,6 @@ plugins:
   - serverless-aws-documentation
   - serverless-iam-roles-per-function
 
-# Uncomment to enable individual packaging
 package:
   individually: true
 
@@ -22,7 +21,8 @@ provider:
     TODOS_TABLE: Todos-${self:provider.stage}
     INDEX_NAME: Todos-index-${self:provider.stage}
     # the name of this S3 bucket must be unique within the whole aws
-    # IMAGES_S3_BUCKET: serverless-udagram-images-rebh-${self:provider.stage}
+    ATTACHMENTS_S3_BUCKET: serverless-attachments-rebh-${self:provider.stage}
+    SIGNED_URL_EXPIRATION: 300
 
 custom:
   documentation:
@@ -50,29 +50,10 @@ functions:
           cors: true
           authorizer: Auth
     iamRoleStatements:
-      # - Effect: Allow
-      #   Action:
-      #     - dynamodb:Query
-      #   Resource: arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.TODOS_TABLE}
       - Effect: Allow
         Action:
           - dynamodb:Query
         Resource: arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.TODOS_TABLE}/index/${self:provider.environment.INDEX_NAME}
-
-  # CreateGroup:
-  #   handler: src/lambda/http/createGroup.handler
-  #   events:
-  #     - http:
-  #         method: post
-  #         path: groups
-  #         cors: true
-  #         # authorizer: Auth
-  #         reqValidatorName: RequestBodyValidator
-  #         documentation:
-  #           summary: Create a new group
-  #           description: Create a new group
-  #           requestModels:
-  #             'application/json': GroupRequest
 
   # TODO: Configure this function
   CreateTodo:
@@ -120,12 +101,23 @@ functions:
         Resource: arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.TODOS_TABLE}
 
   # TODO: Configure this function
-  # GenerateUploadUrl:
-  #   handler: src/lambda/http/generateUploadUrl.handler
-  #   events:
-  #     - http:
-  #         method: post
-  #         path: todos/{todoId}/attachment
+  GenerateUploadUrl:
+    handler: src/lambda/http/generateUploadUrl.handler
+    events:
+      - http:
+          method: post
+          path: todos/{todoId}/attachment
+          cors: true
+          authorizer: Auth
+    iamRoleStatements:
+      - Effect: Allow
+        Action:
+          - dynamodb:UpdateItem
+        Resource: arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.TODOS_TABLE}
+      - Effect: Allow
+        Action:
+          - s3:PutObject
+        Resource: 'arn:aws:s3:::${self:provider.environment.ATTACHMENTS_S3_BUCKET}/*'
 
 resources:
   Resources:
@@ -169,43 +161,36 @@ resources:
             Projection:
               ProjectionType: ALL # What attributes will be copied to an index
 
-    # RequestBodyValidator:
-    #   Type: AWS::ApiGateway::RequestValidator
-    #   Properties:
-    #     Name: 'request-body-validator'
-    #     RestApiId:
-    #       Ref: ApiGatewayRestApi
-    #     ValidateRequestBody: true
-    #     ValidateRequestParameters: false
+    AttachmentsBucket:
+      Type: AWS::S3::Bucket
+      Properties:
+        BucketName: ${self:provider.environment.ATTACHMENTS_S3_BUCKET}
+        CorsConfiguration:
+          CorsRules:
+            - AllowedOrigins:
+                - '*'
+              AllowedHeaders:
+                - '*'
+              AllowedMethods:
+                - GET
+                - PUT
+                - POST
+                - DELETE
+                - HEAD
+              MaxAge: 3000
 
-    # AttachmentsBucket:
-    #   Type: AWS::S3::Bucket
-    #   Properties:
-    #     BucketName: ${self:provider.environment.IMAGES_S3_BUCKET}
-    #     CorsConfiguration:
-    #       CorsRules:
-    #         - AllowedOrigins:
-    #             - '*'
-    #           AllowedHeaders:
-    #             - '*'
-    #           AllowedMethods:
-    #             - GET
-    #             - PUT
-    #             - POST
-    #             - DELETE
-    #             - HEAD
-    #           MaxAge: 3000
-
-    # BucketPolicy:
-    #   Type: AWS::S3::BucketPolicy
-    #   Properties:
-    #     PolicyDocument:
-    #       Id: MyPolicy
-    #       Version: '2012-10-17'
-    #       Statement:
-    #         - Sid: PublicReadForGetBucketObjects
-    #           Effect: Allow
-    #           Principal: '*'
-    #           Action: 's3:GetObject'
-    #           Resource: 'arn:aws:s3:::${self:provider.environment.IMAGES_S3_BUCKET}/*'
-    #     Bucket: !Ref AttachmentsBucket
+    BucketPolicy:
+      Type: AWS::S3::BucketPolicy
+      Properties:
+        PolicyDocument:
+          Id: MyPolicy
+          Version: '2012-10-17'
+          Statement:
+            - Sid: PublicReadForGetBucketObjects
+              Effect: Allow
+              Principal: '*'
+              Action:
+                - s3:GetObject
+                - s3:PutObject
+              Resource: 'arn:aws:s3:::${self:provider.environment.ATTACHMENTS_S3_BUCKET}/*'
+        Bucket: !Ref AttachmentsBucket

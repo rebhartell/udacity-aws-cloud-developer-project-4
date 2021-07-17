@@ -5,7 +5,7 @@
   "type": "object",
   "properties": {
     "userId": {
-      "description": "id of the user who created a TODO item",
+      "description": "id of the user who created a TODO item - managed by authentication layer",
       "type": "string"
     },
     "todoId": {

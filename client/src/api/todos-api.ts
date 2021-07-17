@@ -1,7 +1,7 @@
-import Axios from 'axios';
-import { apiEndpoint } from '../config';
-import { CreateTodoRequest } from '../types/CreateTodoRequest';
+import { apiEndpoint } from '../config'
 import { Todo } from '../types/Todo';
+import { CreateTodoRequest } from '../types/CreateTodoRequest';
+import Axios from 'axios'
 import { UpdateTodoRequest } from '../types/UpdateTodoRequest';
 
 export async function getTodos(idToken: string): Promise<Todo[]> {
@@ -13,7 +13,6 @@ export async function getTodos(idToken: string): Promise<Todo[]> {
       'Authorization': `Bearer ${idToken}`
     },
   })
-
   console.log('Todos:', response.data)
   return response.data.items
 }
@@ -22,16 +21,12 @@ export async function createTodo(
   idToken: string,
   newTodo: CreateTodoRequest
 ): Promise<Todo> {
-  console.log('Create todo:', newTodo)
-
   const response = await Axios.post(`${apiEndpoint}/todos`,  JSON.stringify(newTodo), {
     headers: {
       'Content-Type': 'application/json',
       'Authorization': `Bearer ${idToken}`
     }
   })
-
-  console.log('Todo:', response.data)
   return response.data.item
 }
 

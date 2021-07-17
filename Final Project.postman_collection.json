@@ -38,7 +38,7 @@
 					"response": []
 				},
 				{
-					"name": "Create todo - 1 of 3",
+					"name": "Create todo",
 					"event": [
 						{
 							"listen": "prerequest",
@@ -47,9 +47,9 @@
 									"",
 									"const fromTime = new Date().getTime();",
 									"const SEVEN_DAYS_IN_MSECS = 7 * 24 * 60 * 60 * 1000;",
-									"const randomDueDate = (new Date(fromTime + Math.random() * SEVEN_DAYS_IN_MSECS)).toISOString();",
+									"const randomDueDate = (new Date(fromTime + Math.random() * SEVEN_DAYS_IN_MSECS)).toISOString().substring(0,10);",
 									"",
-									"pm.environment.set(\"randomDueDate\", randomDueDate);"
+									"pm.collectionVariables.set(\"randomDueDate\", randomDueDate);"
 								],
 								"type": "text/javascript"
 							}
@@ -58,10 +58,10 @@
 							"listen": "test",
 							"script": {
 								"exec": [
-									"// Tried to put the todoId into a collection variable but only global appears to work",
+									"",
 									"var jsonData = JSON.parse(responseBody);",
 									"",
-									"pm.globals.set(\"todoId\", jsonData.item.todoId);",
+									"pm.collectionVariables.set(\"todoId\", jsonData.item.todoId);",
 									""
 								],
 								"type": "text/javascript"
@@ -106,7 +106,7 @@
 					"response": []
 				},
 				{
-					"name": "Update todo - 2 of 3",
+					"name": "Update todo",
 					"event": [
 						{
 							"listen": "prerequest",
@@ -115,9 +115,9 @@
 									"",
 									"const fromTime = new Date().getTime();",
 									"const SEVEN_DAYS_IN_MSECS = 7 * 24 * 60 * 60 * 1000;",
-									"const randomDueDate = (new Date(fromTime + Math.random() * SEVEN_DAYS_IN_MSECS)).toISOString();",
+									"const randomDueDate = (new Date(fromTime + Math.random() * SEVEN_DAYS_IN_MSECS)).toISOString().substring(0,10);",
 									"",
-									"pm.environment.set(\"randomDueDate\", randomDueDate);"
+									"pm.collectionVariables.set(\"randomDueDate\", randomDueDate);"
 								],
 								"type": "text/javascript"
 							}
@@ -168,7 +168,7 @@
 					"response": []
 				},
 				{
-					"name": "Delete todo - 3 of 3",
+					"name": "Delete todo",
 					"request": {
 						"method": "DELETE",
 						"header": [
@@ -214,22 +214,32 @@
 					"response": []
 				},
 				{
-					"name": "Get attachment URL",
+					"name": "Get attachment upload URL",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"var jsonData = JSON.parse(responseBody);",
+									"",
+									"pm.collectionVariables.set(\"uploadAttachmentUrl\", jsonData.uploadUrl);",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
 					"request": {
 						"method": "POST",
 						"header": [
 							{
 								"key": "Authorization",
-								"value": "Bearer {{authToken}}",
-								"type": "text"
+								"type": "text",
+								"value": "Bearer {{authToken}}"
 							}
 						],
-						"body": {
-							"mode": "raw",
-							"raw": ""
-						},
 						"url": {
-							"raw": "https://{{apiId}}.execute-api.us-east-1.amazonaws.com/dev/todos/3836b777-9bc4-4429-9b79-ba4e4f5f91c0/attachment",
+							"raw": "https://{{apiId}}.execute-api.us-east-1.amazonaws.com/dev/todos/{{todoId}}/attachment",
 							"protocol": "https",
 							"host": [
 								"{{apiId}}",
@@ -241,7 +251,7 @@
 							"path": [
 								"dev",
 								"todos",
-								"3836b777-9bc4-4429-9b79-ba4e4f5f91c0",
+								"{{todoId}}",
 								"attachment"
 							]
 						}
@@ -269,6 +279,50 @@
 					}
 				}
 			]
+		},
+		{
+			"name": "Upload Attachment Image",
+			"protocolProfileBehavior": {
+				"disabledSystemHeaders": {}
+			},
+			"request": {
+				"method": "PUT",
+				"header": [],
+				"body": {
+					"mode": "file",
+					"file": {
+						"src": "/home/rebh/Development/udacity-aws-cloud-developer-project-3/s3-images/car.jpg"
+					}
+				},
+				"url": {
+					"raw": "{{uploadAttachmentUrl}}",
+					"host": [
+						"{{uploadAttachmentUrl}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get Attachment Image",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "https://serverless-attachments-rebh-dev.s3.amazonaws.com/{{todoId}}",
+					"protocol": "https",
+					"host": [
+						"serverless-attachments-rebh-dev",
+						"s3",
+						"amazonaws",
+						"com"
+					],
+					"path": [
+						"{{todoId}}"
+					]
+				}
+			},
+			"response": []
 		}
 	],
 	"event": [
@@ -302,6 +356,14 @@
 		},
 		{
 			"key": "randomDueDate",
+			"value": ""
+		},
+		{
+			"key": "todoId",
+			"value": ""
+		},
+		{
+			"key": "uploadAttachmentUrl",
 			"value": ""
 		}
 	]
