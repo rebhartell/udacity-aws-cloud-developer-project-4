@@ -1,6 +1,6 @@
 {
 	"info": {
-		"_postman_id": "d0700d24-79ec-487e-8403-b565bef7f8e0",
+		"_postman_id": "4939a349-8972-476d-93ff-81e8f8bfa390",
 		"name": "Udacity C4 Project",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
 	},
@@ -10,6 +10,41 @@
 			"item": [
 				{
 					"name": "Get all todos",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"// TESTS",
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"Todo items are returned\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData).to.have.property('items');",
+									"});",
+									"",
+									"pm.test(\"First Todo item has expected fields\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    if (jsonData['items'].length > 0) {",
+									"        var item0 = jsonData['items'][0];",
+									"        pm.expect(item0).to.have.property('createdAt');",
+									"        pm.expect(item0).to.have.property('todoId');",
+									"        pm.expect(item0).to.have.property('name');",
+									"        pm.expect(item0).to.have.property('done');",
+									"        pm.expect(item0).to.have.property('dueDate');",
+									"    }",
+									"});",
+									"",
+									"pm.test(\"Response time is less than 5000ms\", function () {",
+									"    pm.expect(pm.response.responseTime).to.be.below(5000);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
 					"request": {
 						"method": "GET",
 						"header": [
@@ -19,10 +54,6 @@
 								"type": "text"
 							}
 						],
-						"body": {
-							"mode": "raw",
-							"raw": ""
-						},
 						"url": {
 							"raw": "https://{{apiId}}.execute-api.us-east-1.amazonaws.com/dev/todos",
 							"protocol": "https",
@@ -43,6 +74,59 @@
 				},
 				{
 					"name": "Create todo",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"// PRE-SET VARIABLES",
+									"const fromTime = new Date().getTime();",
+									"const SEVEN_DAYS_IN_MSECS = 7 * 24 * 60 * 60 * 1000;",
+									"const randomDueDate = (new Date(fromTime + Math.random() * SEVEN_DAYS_IN_MSECS)).toISOString().substring(0,10);",
+									"",
+									"pm.collectionVariables.set(\"randomDueDate\", randomDueDate);"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"// LOAD VARIABLES",
+									"var jsonData = JSON.parse(responseBody);",
+									"pm.collectionVariables.set(\"todoId\", jsonData.item.todoId);",
+									"",
+									"// TESTS",
+									"pm.test(\"Status code is 201\", function () {",
+									"    pm.response.to.have.status(201);",
+									"});",
+									"",
+									"pm.test(\"Todo item is returned\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData).to.have.property('item');",
+									"});",
+									"",
+									"pm.test(\"Todo item has expected fields\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    if (jsonData['item']) {",
+									"        var item = jsonData['item'];",
+									"        pm.expect(item).to.have.property('createdAt');",
+									"        pm.expect(item).to.have.property('todoId');",
+									"        pm.expect(item).to.have.property('name');",
+									"        pm.expect(item).to.have.property('done');",
+									"        pm.expect(item).to.have.property('dueDate');",
+									"    }",
+									"});",
+									"",
+									"pm.test(\"Response time is less than 5000ms\", function () {",
+									"    pm.expect(pm.response.responseTime).to.be.below(5000);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
 					"request": {
 						"method": "POST",
 						"header": [
@@ -60,7 +144,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n\t\"name\": \"Water flowers\",\n\t\"dueDate\": \"2019-06-11\"\n}"
+							"raw": "{\n\t\"name\": \"{{$randomVerb}} {{$randomNoun}}\",\n\t\"dueDate\": \"{{randomDueDate}}\"\n}"
 						},
 						"url": {
 							"raw": "https://{{apiId}}.execute-api.us-east-1.amazonaws.com/dev/todos",
@@ -82,8 +166,44 @@
 				},
 				{
 					"name": "Update todo",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"// PRE-SET VARIABLES",
+									"const fromTime = new Date().getTime();",
+									"const SEVEN_DAYS_IN_MSECS = 7 * 24 * 60 * 60 * 1000;",
+									"const randomDueDate = (new Date(fromTime + Math.random() * SEVEN_DAYS_IN_MSECS)).toISOString().substring(0,10);",
+									"",
+									"pm.collectionVariables.set(\"randomDueDate\", randomDueDate);"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"// TESTS",
+									"pm.test(\"Status code is 204\", function () {",
+									"    pm.response.to.have.status(204);",
+									"});",
+									"",
+									"pm.test(\"Body is empty\", function () {",
+									"    pm.response.to.have.body(\"\");",
+									"});",
+									"",
+									"pm.test(\"Response time is less than 5000ms\", function () {",
+									"    pm.expect(pm.response.responseTime).to.be.below(5000);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
 					"request": {
-						"method": "PUT",
+						"method": "PATCH",
 						"header": [
 							{
 								"key": "Content-Type",
@@ -99,10 +219,10 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n\t\"name\": \"Change the world\",\n\t\"dueDate\": \"2019-12-11\",\n\t\"done\": true\n}"
+							"raw": "{\n\t\"name\": \"{{$randomVerb}} {{$randomNoun}}\",\n\t\"dueDate\": \"{{randomDueDate}}\",\n\t\"done\": false\n}"
 						},
 						"url": {
-							"raw": "https://{{apiId}}.execute-api.us-east-1.amazonaws.com/dev/todos/35dd600f-43c2-4649-903c-615e1586a26f",
+							"raw": "https://{{apiId}}.execute-api.us-east-1.amazonaws.com/dev/todos/:todoId",
 							"protocol": "https",
 							"host": [
 								"{{apiId}}",
@@ -114,7 +234,163 @@
 							"path": [
 								"dev",
 								"todos",
-								"35dd600f-43c2-4649-903c-615e1586a26f"
+								":todoId"
+							],
+							"variable": [
+								{
+									"key": "todoId",
+									"value": "{{todoId}}"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get attachment upload URL",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"// SET VARIABLES",
+									"var jsonData = JSON.parse(responseBody);",
+									"pm.collectionVariables.set(\"uploadAttachmentUrl\", jsonData.uploadUrl);",
+									"",
+									"// TESTS",
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"message 'Invalid request body' is returned\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData).to.have.property('uploadUrl');",
+									"});",
+									"",
+									"pm.test(\"Response time is less than 5000ms\", function () {",
+									"    pm.expect(pm.response.responseTime).to.be.below(5000);",
+									"});",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"type": "text",
+								"value": "Bearer {{authToken}}"
+							}
+						],
+						"url": {
+							"raw": "https://{{apiId}}.execute-api.us-east-1.amazonaws.com/dev/todos/{{todoId}}/attachment",
+							"protocol": "https",
+							"host": [
+								"{{apiId}}",
+								"execute-api",
+								"us-east-1",
+								"amazonaws",
+								"com"
+							],
+							"path": [
+								"dev",
+								"todos",
+								"{{todoId}}",
+								"attachment"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Upload Attachment Image",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"// TESTS",
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"Body is empty\", function () {",
+									"    pm.response.to.have.body(\"\");",
+									"});",
+									"",
+									"pm.test(\"Response time is less than 5000ms\", function () {",
+									"    pm.expect(pm.response.responseTime).to.be.below(5000);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"protocolProfileBehavior": {
+						"disabledSystemHeaders": {}
+					},
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "file",
+							"file": {
+								"src": "/home/rebh/Development/udacity-aws-cloud-developer-project-3/s3-images/car.jpg"
+							}
+						},
+						"url": {
+							"raw": "{{uploadAttachmentUrl}}",
+							"host": [
+								"{{uploadAttachmentUrl}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Attachment Image",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"// TESTS",
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"// When run as a collection the test is run before the image has actually",
+									"// loaded so the test fails",
+									"// Run the command manually and the test works",
+									"// pm.test('Content-Type\", \"image/jpeg\"', function () {",
+									"//     pm.response.to.be.header(\"Content-Type\", \"image/jpeg\")",
+									"// });",
+									"",
+									"pm.test(\"Response time is less than 5000ms\", function () {",
+									"    pm.expect(pm.response.responseTime).to.be.below(5000);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "https://serverless-attachments-rebh-dev.s3.amazonaws.com/{{todoId}}",
+							"protocol": "https",
+							"host": [
+								"serverless-attachments-rebh-dev",
+								"s3",
+								"amazonaws",
+								"com"
+							],
+							"path": [
+								"{{todoId}}"
 							]
 						}
 					},
@@ -122,6 +398,28 @@
 				},
 				{
 					"name": "Delete todo",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"// TESTS",
+									"pm.test(\"Status code is 204\", function () {",
+									"    pm.response.to.have.status(204);",
+									"});",
+									"",
+									"pm.test(\"Body is empty\", function () {",
+									"    pm.response.to.have.body(\"\");",
+									"});",
+									"",
+									"pm.test(\"Response time is less than 5000ms\", function () {",
+									"    pm.expect(pm.response.responseTime).to.be.below(5000);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
 					"request": {
 						"method": "DELETE",
 						"header": [
@@ -142,7 +440,7 @@
 							"raw": ""
 						},
 						"url": {
-							"raw": "https://{{apiId}}.execute-api.us-east-1.amazonaws.com/dev/todos/fe671583-4512-45f6-9475-4265c04362fb",
+							"raw": "https://{{apiId}}.execute-api.us-east-1.amazonaws.com/dev/todos/:todoId",
 							"protocol": "https",
 							"host": [
 								"{{apiId}}",
@@ -154,42 +452,13 @@
 							"path": [
 								"dev",
 								"todos",
-								"fe671583-4512-45f6-9475-4265c04362fb"
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "Get attachment URL",
-					"request": {
-						"method": "POST",
-						"header": [
-							{
-								"key": "Authorization",
-								"value": "Bearer {{authToken}}",
-								"type": "text"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": ""
-						},
-						"url": {
-							"raw": "https://{{apiId}}.execute-api.us-east-1.amazonaws.com/dev/todos/3836b777-9bc4-4429-9b79-ba4e4f5f91c0/attachment",
-							"protocol": "https",
-							"host": [
-								"{{apiId}}",
-								"execute-api",
-								"us-east-1",
-								"amazonaws",
-								"com"
+								":todoId"
 							],
-							"path": [
-								"dev",
-								"todos",
-								"3836b777-9bc4-4429-9b79-ba4e4f5f91c0",
-								"attachment"
+							"variable": [
+								{
+									"key": "todoId",
+									"value": "{{todoId}}"
+								}
 							]
 						}
 					},
@@ -200,7 +469,6 @@
 				{
 					"listen": "prerequest",
 					"script": {
-						"id": "ce2b42d4-8cc5-4f30-a6ed-e7f0f303c3fd",
 						"type": "text/javascript",
 						"exec": [
 							""
@@ -210,12 +478,670 @@
 				{
 					"listen": "test",
 					"script": {
-						"id": "efb16c49-3866-4241-97d1-360ad72736d8",
 						"type": "text/javascript",
 						"exec": [
 							""
 						]
 					}
+				}
+			]
+		},
+		{
+			"name": "TODOs - bad validation",
+			"item": [
+				{
+					"name": "Create todo - bad 'name'",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"",
+									"const fromTime = new Date().getTime();",
+									"const SEVEN_DAYS_IN_MSECS = 7 * 24 * 60 * 60 * 1000;",
+									"const randomDueDate = (new Date(fromTime + Math.random() * SEVEN_DAYS_IN_MSECS)).toISOString().substring(0,10);",
+									"",
+									"pm.collectionVariables.set(\"randomDueDate\", randomDueDate);"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"// TESTS",
+									"pm.test(\"Status code is 400\", function () {",
+									"    pm.response.to.have.status(400);",
+									"});",
+									"",
+									"pm.test(\"message 'Invalid request body' is returned\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData).to.have.property('message');",
+									"    pm.expect(jsonData.message).to.eql(\"Invalid request body\");",
+									"});",
+									"",
+									"pm.test(\"Response time is less than 5000ms\", function () {",
+									"    pm.expect(pm.response.responseTime).to.be.below(5000);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"type": "text",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"type": "text",
+								"value": "Bearer {{authToken}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\t\"name\": \"\",\n\t\"dueDate\": \"{{randomDueDate}}\"\n}"
+						},
+						"url": {
+							"raw": "https://{{apiId}}.execute-api.us-east-1.amazonaws.com/dev/todos",
+							"protocol": "https",
+							"host": [
+								"{{apiId}}",
+								"execute-api",
+								"us-east-1",
+								"amazonaws",
+								"com"
+							],
+							"path": [
+								"dev",
+								"todos"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Create todo - bad 'dueDate'",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"",
+									"const fromTime = new Date().getTime();",
+									"const SEVEN_DAYS_IN_MSECS = 7 * 24 * 60 * 60 * 1000;",
+									"const randomDueDate = (new Date(fromTime + Math.random() * SEVEN_DAYS_IN_MSECS)).toISOString().substring(0,10);",
+									"",
+									"pm.collectionVariables.set(\"randomDueDate\", randomDueDate);"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"// TESTS",
+									"pm.test(\"Status code is 400\", function () {",
+									"    pm.response.to.have.status(400);",
+									"});",
+									"",
+									"pm.test(\"message 'Invalid request body' is returned\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData).to.have.property('message');",
+									"    pm.expect(jsonData.message).to.eql(\"Invalid request body\");",
+									"});",
+									"",
+									"pm.test(\"Response time is less than 5000ms\", function () {",
+									"    pm.expect(pm.response.responseTime).to.be.below(5000);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"type": "text",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"type": "text",
+								"value": "Bearer {{authToken}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\t\"name\": \"Valid name\",\n\t\"dueDate\": \"Invalid dueDate should match 2021-07-18\"\n}"
+						},
+						"url": {
+							"raw": "https://{{apiId}}.execute-api.us-east-1.amazonaws.com/dev/todos",
+							"protocol": "https",
+							"host": [
+								"{{apiId}}",
+								"execute-api",
+								"us-east-1",
+								"amazonaws",
+								"com"
+							],
+							"path": [
+								"dev",
+								"todos"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update todo - bad 'name'",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"// PRE-SET VARIABLES",
+									"const fromTime = new Date().getTime();",
+									"const SEVEN_DAYS_IN_MSECS = 7 * 24 * 60 * 60 * 1000;",
+									"const randomDueDate = (new Date(fromTime + Math.random() * SEVEN_DAYS_IN_MSECS)).toISOString().substring(0,10);",
+									"",
+									"pm.collectionVariables.set(\"randomDueDate\", randomDueDate);"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"// TESTS",
+									"pm.test(\"Status code is 400\", function () {",
+									"    pm.response.to.have.status(400);",
+									"});",
+									"",
+									"pm.test(\"message 'Invalid request body' is returned\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData).to.have.property('message');",
+									"    pm.expect(jsonData.message).to.eql(\"Invalid request body\");",
+									"});",
+									"",
+									"pm.test(\"Response time is less than 5000ms\", function () {",
+									"    pm.expect(pm.response.responseTime).to.be.below(5000);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"type": "text",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"type": "text",
+								"value": "Bearer {{authToken}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\t\"name\": \"\",\n\t\"dueDate\": \"{{randomDueDate}}\",\n\t\"done\": false\n}"
+						},
+						"url": {
+							"raw": "https://{{apiId}}.execute-api.us-east-1.amazonaws.com/dev/todos/:todoId",
+							"protocol": "https",
+							"host": [
+								"{{apiId}}",
+								"execute-api",
+								"us-east-1",
+								"amazonaws",
+								"com"
+							],
+							"path": [
+								"dev",
+								"todos",
+								":todoId"
+							],
+							"variable": [
+								{
+									"key": "todoId",
+									"value": "{{todoId}}"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update todo - bad 'dueDate'",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"// PRE-SET VARIABLES",
+									"const fromTime = new Date().getTime();",
+									"const SEVEN_DAYS_IN_MSECS = 7 * 24 * 60 * 60 * 1000;",
+									"const randomDueDate = (new Date(fromTime + Math.random() * SEVEN_DAYS_IN_MSECS)).toISOString().substring(0,10);",
+									"",
+									"pm.collectionVariables.set(\"randomDueDate\", randomDueDate);"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"// TESTS",
+									"pm.test(\"Status code is 400\", function () {",
+									"    pm.response.to.have.status(400);",
+									"});",
+									"",
+									"pm.test(\"message 'Invalid request body' is returned\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData).to.have.property('message');",
+									"    pm.expect(jsonData.message).to.eql(\"Invalid request body\");",
+									"});",
+									"",
+									"pm.test(\"Response time is less than 5000ms\", function () {",
+									"    pm.expect(pm.response.responseTime).to.be.below(5000);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"type": "text",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"type": "text",
+								"value": "Bearer {{authToken}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\t\"name\": \"Valid name\",\n\t\"dueDate\": \"Invalid dueDate should match 2021-07-18\",\n\t\"done\": false\n}"
+						},
+						"url": {
+							"raw": "https://{{apiId}}.execute-api.us-east-1.amazonaws.com/dev/todos/:todoId",
+							"protocol": "https",
+							"host": [
+								"{{apiId}}",
+								"execute-api",
+								"us-east-1",
+								"amazonaws",
+								"com"
+							],
+							"path": [
+								"dev",
+								"todos",
+								":todoId"
+							],
+							"variable": [
+								{
+									"key": "todoId",
+									"value": "{{todoId}}"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "TODOs - no auth",
+			"item": [
+				{
+					"name": "Get all todos - no auth",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"// TESTS",
+									"pm.test(\"Status code is 401\", function () {",
+									"    pm.response.to.have.status(401);",
+									"});",
+									"",
+									"pm.test(\"message 'Unauthorized' is returned\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData).to.have.property('message');",
+									"    pm.expect(jsonData.message).to.eql(\"Unauthorized\");",
+									"});",
+									"",
+									"pm.test(\"Response time is less than 5000ms\", function () {",
+									"    pm.expect(pm.response.responseTime).to.be.below(5000);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "https://{{apiId}}.execute-api.us-east-1.amazonaws.com/dev/todos",
+							"protocol": "https",
+							"host": [
+								"{{apiId}}",
+								"execute-api",
+								"us-east-1",
+								"amazonaws",
+								"com"
+							],
+							"path": [
+								"dev",
+								"todos"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Create todo - no auth",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"// PRE-SET VARIABLES",
+									"const fromTime = new Date().getTime();",
+									"const SEVEN_DAYS_IN_MSECS = 7 * 24 * 60 * 60 * 1000;",
+									"const randomDueDate = (new Date(fromTime + Math.random() * SEVEN_DAYS_IN_MSECS)).toISOString().substring(0,10);",
+									"",
+									"pm.collectionVariables.set(\"randomDueDate\", randomDueDate);"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"// TESTS",
+									"pm.test(\"Status code is 401\", function () {",
+									"    pm.response.to.have.status(401);",
+									"});",
+									"",
+									"pm.test(\"message 'Unauthorized' is returned\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData).to.have.property('message');",
+									"    pm.expect(jsonData.message).to.eql(\"Unauthorized\");",
+									"});",
+									"",
+									"pm.test(\"Response time is less than 5000ms\", function () {",
+									"    pm.expect(pm.response.responseTime).to.be.below(5000);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\t\"name\": \"{{$randomVerb}} {{$randomNoun}}\",\n\t\"dueDate\": \"{{randomDueDate}}\"\n}"
+						},
+						"url": {
+							"raw": "https://{{apiId}}.execute-api.us-east-1.amazonaws.com/dev/todos",
+							"protocol": "https",
+							"host": [
+								"{{apiId}}",
+								"execute-api",
+								"us-east-1",
+								"amazonaws",
+								"com"
+							],
+							"path": [
+								"dev",
+								"todos"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update todo - no auth",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"// PRE-SET VARIABLES",
+									"const fromTime = new Date().getTime();",
+									"const SEVEN_DAYS_IN_MSECS = 7 * 24 * 60 * 60 * 1000;",
+									"const randomDueDate = (new Date(fromTime + Math.random() * SEVEN_DAYS_IN_MSECS)).toISOString().substring(0,10);",
+									"",
+									"pm.collectionVariables.set(\"randomDueDate\", randomDueDate);"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"// TESTS",
+									"pm.test(\"Status code is 401\", function () {",
+									"    pm.response.to.have.status(401);",
+									"});",
+									"",
+									"pm.test(\"message 'Unauthorized' is returned\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData).to.have.property('message');",
+									"    pm.expect(jsonData.message).to.eql(\"Unauthorized\");",
+									"});",
+									"",
+									"pm.test(\"Response time is less than 5000ms\", function () {",
+									"    pm.expect(pm.response.responseTime).to.be.below(5000);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"type": "text",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\t\"name\": \"{{$randomVerb}} {{$randomNoun}}\",\n\t\"dueDate\": \"{{randomDueDate}}\",\n\t\"done\": false\n}"
+						},
+						"url": {
+							"raw": "https://{{apiId}}.execute-api.us-east-1.amazonaws.com/dev/todos/:todoId",
+							"protocol": "https",
+							"host": [
+								"{{apiId}}",
+								"execute-api",
+								"us-east-1",
+								"amazonaws",
+								"com"
+							],
+							"path": [
+								"dev",
+								"todos",
+								":todoId"
+							],
+							"variable": [
+								{
+									"key": "todoId",
+									"value": "{{todoId}}"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get attachment upload URL - no auth",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"// TESTS",
+									"pm.test(\"Status code is 401\", function () {",
+									"    pm.response.to.have.status(401);",
+									"});",
+									"",
+									"pm.test(\"message 'Unauthorized' is returned\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData).to.have.property('message');",
+									"    pm.expect(jsonData.message).to.eql(\"Unauthorized\");",
+									"});",
+									"",
+									"pm.test(\"Response time is less than 5000ms\", function () {",
+									"    pm.expect(pm.response.responseTime).to.be.below(5000);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "https://{{apiId}}.execute-api.us-east-1.amazonaws.com/dev/todos/{{todoId}}/attachment",
+							"protocol": "https",
+							"host": [
+								"{{apiId}}",
+								"execute-api",
+								"us-east-1",
+								"amazonaws",
+								"com"
+							],
+							"path": [
+								"dev",
+								"todos",
+								"{{todoId}}",
+								"attachment"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete todo - no auth",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"// TESTS",
+									"pm.test(\"Status code is 401\", function () {",
+									"    pm.response.to.have.status(401);",
+									"});",
+									"",
+									"pm.test(\"message 'Unauthorized' is returned\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData).to.have.property('message');",
+									"    pm.expect(jsonData.message).to.eql(\"Unauthorized\");",
+									"});",
+									"",
+									"pm.test(\"Response time is less than 5000ms\", function () {",
+									"    pm.expect(pm.response.responseTime).to.be.below(5000);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"type": "text",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"url": {
+							"raw": "https://{{apiId}}.execute-api.us-east-1.amazonaws.com/dev/todos/:todoId",
+							"protocol": "https",
+							"host": [
+								"{{apiId}}",
+								"execute-api",
+								"us-east-1",
+								"amazonaws",
+								"com"
+							],
+							"path": [
+								"dev",
+								"todos",
+								":todoId"
+							],
+							"variable": [
+								{
+									"key": "todoId",
+									"value": "{{todoId}}"
+								}
+							]
+						}
+					},
+					"response": []
 				}
 			]
 		}
@@ -224,7 +1150,6 @@
 		{
 			"listen": "prerequest",
 			"script": {
-				"id": "2e83c0fe-6650-44d5-a90f-4c27ff720d83",
 				"type": "text/javascript",
 				"exec": [
 					""
@@ -234,7 +1159,6 @@
 		{
 			"listen": "test",
 			"script": {
-				"id": "977c227e-2df3-42eb-9a48-ec25e2f7eeae",
 				"type": "text/javascript",
 				"exec": [
 					""
@@ -244,16 +1168,24 @@
 	],
 	"variable": [
 		{
-			"id": "bf208e6b-f66d-4008-9366-dd541ff65425",
 			"key": "apiId",
-			"value": "",
-			"type": "string"
+			"value": ""
 		},
 		{
-			"id": "9bc6399a-d2bb-4f2d-9ffa-8480370d383c",
 			"key": "authToken",
-			"value": "",
-			"type": "string"
+			"value": ""
+		},
+		{
+			"key": "randomDueDate",
+			"value": ""
+		},
+		{
+			"key": "todoId",
+			"value": ""
+		},
+		{
+			"key": "uploadAttachmentUrl",
+			"value": ""
 		}
 	]
 }
