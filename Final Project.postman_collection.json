@@ -567,6 +567,83 @@
 					"response": []
 				},
 				{
+					"name": "Create todo - bad 'dueDate'",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"",
+									"const fromTime = new Date().getTime();",
+									"const SEVEN_DAYS_IN_MSECS = 7 * 24 * 60 * 60 * 1000;",
+									"const randomDueDate = (new Date(fromTime + Math.random() * SEVEN_DAYS_IN_MSECS)).toISOString().substring(0,10);",
+									"",
+									"pm.collectionVariables.set(\"randomDueDate\", randomDueDate);"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"// TESTS",
+									"pm.test(\"Status code is 400\", function () {",
+									"    pm.response.to.have.status(400);",
+									"});",
+									"",
+									"pm.test(\"message 'Invalid request body' is returned\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData).to.have.property('message');",
+									"    pm.expect(jsonData.message).to.eql(\"Invalid request body\");",
+									"});",
+									"",
+									"pm.test(\"Response time is less than 5000ms\", function () {",
+									"    pm.expect(pm.response.responseTime).to.be.below(5000);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"type": "text",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"type": "text",
+								"value": "Bearer {{authToken}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\t\"name\": \"Valid name\",\n\t\"dueDate\": \"Invalid dueDate should match 2021-07-18\"\n}"
+						},
+						"url": {
+							"raw": "https://{{apiId}}.execute-api.us-east-1.amazonaws.com/dev/todos",
+							"protocol": "https",
+							"host": [
+								"{{apiId}}",
+								"execute-api",
+								"us-east-1",
+								"amazonaws",
+								"com"
+							],
+							"path": [
+								"dev",
+								"todos"
+							]
+						}
+					},
+					"response": []
+				},
+				{
 					"name": "Update todo - bad 'name'",
 					"event": [
 						{
@@ -624,6 +701,90 @@
 						"body": {
 							"mode": "raw",
 							"raw": "{\n\t\"name\": \"\",\n\t\"dueDate\": \"{{randomDueDate}}\",\n\t\"done\": false\n}"
+						},
+						"url": {
+							"raw": "https://{{apiId}}.execute-api.us-east-1.amazonaws.com/dev/todos/:todoId",
+							"protocol": "https",
+							"host": [
+								"{{apiId}}",
+								"execute-api",
+								"us-east-1",
+								"amazonaws",
+								"com"
+							],
+							"path": [
+								"dev",
+								"todos",
+								":todoId"
+							],
+							"variable": [
+								{
+									"key": "todoId",
+									"value": "{{todoId}}"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update todo - bad 'dueDate'",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"// PRE-SET VARIABLES",
+									"const fromTime = new Date().getTime();",
+									"const SEVEN_DAYS_IN_MSECS = 7 * 24 * 60 * 60 * 1000;",
+									"const randomDueDate = (new Date(fromTime + Math.random() * SEVEN_DAYS_IN_MSECS)).toISOString().substring(0,10);",
+									"",
+									"pm.collectionVariables.set(\"randomDueDate\", randomDueDate);"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"// TESTS",
+									"pm.test(\"Status code is 400\", function () {",
+									"    pm.response.to.have.status(400);",
+									"});",
+									"",
+									"pm.test(\"message 'Invalid request body' is returned\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData).to.have.property('message');",
+									"    pm.expect(jsonData.message).to.eql(\"Invalid request body\");",
+									"});",
+									"",
+									"pm.test(\"Response time is less than 5000ms\", function () {",
+									"    pm.expect(pm.response.responseTime).to.be.below(5000);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"type": "text",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"type": "text",
+								"value": "Bearer {{authToken}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\t\"name\": \"Valid name\",\n\t\"dueDate\": \"Invalid dueDate should match 2021-07-18\",\n\t\"done\": false\n}"
 						},
 						"url": {
 							"raw": "https://{{apiId}}.execute-api.us-east-1.amazonaws.com/dev/todos/:todoId",
