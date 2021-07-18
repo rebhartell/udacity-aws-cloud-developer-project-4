@@ -1,7 +1,7 @@
 {
   "$schema": "http://json-schema.org/draft-04/schema#",
   "title": "todo",
-  "description": "Fields in a request to create a single TODO item.",
+  "description": "Fields in a request to update a single TODO item.",
   "type": "object",
   "properties": {
     "name": {
@@ -12,11 +12,16 @@
     "dueDate": {
       "description": "date and time by which an item should be completed",
       "type": "string"
+    },
+    "done": {
+      "description": "true if an item was completed, false otherwise",
+      "type": "boolean"
     }
   },
   "required": [
     "name",
-    "dueDate"
+    "dueDate",
+    "done"
   ],
   "additionalProperties": false
 }

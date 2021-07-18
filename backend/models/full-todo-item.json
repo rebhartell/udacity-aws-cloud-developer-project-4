@@ -1,0 +1,44 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "title": "todo",
+  "description": "A complete TODO item as stored in the backend storage",
+  "type": "object",
+  "properties": {
+    "userId": {
+      "description": "id of the user who created a TODO item - managed by authentication layer",
+      "type": "string"
+    },
+    "todoId": {
+      "description": "a unique id for an item",
+      "type": "string"
+    },
+    "createdAt": {
+      "description": "date and time when an item was created",
+      "type": "string"
+    },
+    "name": {
+      "description": "name of a TODO item (e.g. \"Change a light bulb\")",
+      "type": "string"
+    },
+    "dueDate": {
+      "description": "date and time by which an item should be completed",
+      "type": "string"
+    },
+    "done": {
+      "description": "true if an item was completed, false otherwise",
+      "type": "boolean"
+    },
+    "attachmentUrl": {
+      "description": "a URL pointing to an image attached to a TODO item",
+      "type": "string"
+    }
+  },
+  "required": [
+    "todoId",
+    "createdAt",
+    "name",
+    "dueDate",
+    "done"
+  ],
+  "additionalProperties": false
+}
